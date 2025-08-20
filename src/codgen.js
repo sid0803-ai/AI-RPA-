@@ -1,13 +1,9 @@
-export async function generateCode(action) {
-  // Fake example: later GPT can expand
-  if (action === "login") {
-    return `
-      await page.goto("https://example.com/login");
-      await page.fill("#email", "test@example.com");
-      await page.fill("#password", "password123");
-      await page.click("button[type=submit]");
-    `;
-  }
-  return "// No code generated yet";
+import { spawn } from "child_process";
+
+export function runCodegen(url = "https://dev.indiafilings.com") {
+  const child = spawn("npx", ["playwright", "codegen", url], { stdio: "inherit" });
+
+  child.on("exit", (code) => {
+    console.log(`Codegen exited with code ${code}`);
+  });
 }
-// src/codgen.js

@@ -1,23 +1,30 @@
 import express from "express";
-import { generateCode } from "./codegen.js";
-import { askAI } from "./aiService.js";
+import { generateCodeFromPrompt } from "./aiService.js";
+import { runCodegen } from "./codegen.js";
+import fs from "fs";
 
 const app = express();
 app.use(express.json());
 
-// 🔹 Route to talk with AI
-app.post("/ai", async (req, res) => {
+app.post("/rpa/generate", async (req, res) => {
   const { prompt } = req.body;
-  const reply = await askAI(prompt);
-  res.json({ reply });
+  try {
+    const code = await generateCodeFromPrompt(prompt);
+
+    // Save AI-generated code
+    const filePath = `./scripts/generated/${Date.now()}-flow.spec.ts`;
+    fs.writeFileSync(filePath, code);
+
+    res.json({ success: true, filePath, code });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// 🔹 Route to auto-generate code from AI
-app.post("/generate", async (req, res) => {
-  const { action } = req.body;
-  const code = await generateCode(action);
-  res.json({ code });
+// Launch codegen manually if needed
+app.get("/rpa/codegen", (req, res) => {
+  runCodegen("https://indiafilings.com"); // Example site
+  res.send("Codegen started...");
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(4000, () => console.log("✅ RPA AI server running on http://localhost:4000"));
