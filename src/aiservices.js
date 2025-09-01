@@ -1,18 +1,45 @@
 import axios from "axios";
 
-export async function generateCodeFromPrompt(prompt) {
-  const response = await axios.post(
-    process.env.AI_API_BASE_URL + "/generate",
-    { prompt },
-    { headers: { Authorization: `Bearer ${process.env.AI_API_KEY}` } }
-  );
-  return response.data.code; // assuming your API returns code snippet
+function getApiBaseUrl() {
+  const url = process.env.AI_API_BASE_URL;
+  if (!url) {
+    throw new Error("AI_API_BASE_URL environment variable is not set.");
+  }
+  return url;
 }
+
+function getApiKey() {
+  const key = process.env.AI_API_KEY;
+  if (!key) {
+    throw new Error("AI_API_KEY environment variable is not set.");
+  }
+  return key;
+}
+
+export async function generateCodeFromPrompt(prompt) {
+  try {
+    const response = await axios.post(
+      `${getApiBaseUrl()}/generate`,
+      { prompt },
+      { headers: { Authorization: `Bearer ${getApiKey()}` } }
+    );
+    return response.data.code;
+  } catch (error) {
+    console.error("Error in generateCodeFromPrompt:", error.message);
+    throw new Error(error.response?.data?.error || "Failed to generate code from AI.");
+  }
+}
+
 export async function askAI(prompt) {
-  const response = await axios.post(
-    process.env.AI_API_BASE_URL + "/ask",
-    { prompt },
-    { headers: { Authorization: `Bearer ${process.env.AI_API_KEY}` } }
-  );
-  return response.data.reply; // assuming your API returns a reply
+  try {
+    const response = await axios.post(
+      `${getApiBaseUrl()}/ask`,
+      { prompt },
+      { headers: { Authorization: `Bearer ${getApiKey()}` } }
+    );
+    return response.data.reply;
+  } catch (error) {
+    console.error("Error in askAI:", error.message);
+    throw new Error(error.response?.data?.error || "Failed to get reply from AI.");
+  }
 }

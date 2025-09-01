@@ -1,6 +1,6 @@
 import express from "express";
-import { generateCodeFromPrompt } from "./aiService.js";
-import { runCodegen } from "./codegen.js";
+import { generateCodeFromPrompt } from "./aiservices.js";
+import { runCodegen } from "./codgen.js";
 import fs from "fs";
 
 const app = express();
@@ -17,7 +17,7 @@ app.post("/rpa/generate", async (req, res) => {
 
     res.json({ success: true, filePath, code });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });      
   }
 });
 
